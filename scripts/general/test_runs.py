@@ -9,31 +9,33 @@ import pyarrow.feather as feather
 import cv2
 import numpy as np
 
+import pandas as pd
 
-feather_foler = '/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/n2/group-housed'
+rows = []
 
-files = [f for f in os.listdir(feather_foler) if f.endswith('tracks.feather')]
+# Existing control lines
+for control in range(1, 4):  # control_1 to control_3
+    for rep in range(1, 5):
+        rows.append({
+            "sample_id": f"control_{control}_{rep}",
+            "condition": f"control_{control}",
+            "replicate": rep
+        })
 
-for file in files:
-    df = feather.read_feather(os.path.join(feather_foler, file))
+# Trip lines (1–22)
+for trip in range(1, 23):  # trip_1 to trip_22
+    for rep in range(1, 5):
+        rows.append({
+            "sample_id": f"trip_{trip}_{rep}",
+            "condition": f"trip_{trip}",
+            "replicate": rep
+        })
 
-    print('Processing file:', file)
-    print(df['track_id'].unique())
+df = pd.DataFrame(rows)
 
-    track_gaps = {}
+# Save to CSV
+df.to_csv("/Users/cochral/Desktop/sample_structure.csv", index=False)
 
-    for track_id in df['track_id'].unique():
-        track_df = df[df['track_id'] == track_id].sort_values(by='frame')
-        frames = track_df['frame'].tolist()
+print(df.head())
+print(df.tail())
 
-        missing_frames = [f for f in range(min(frames), max(frames) + 1) if f not in frames]
-        
-        if missing_frames:
-            track_gaps[track_id] = missing_frames
-
-    if track_gaps:
-        print("Tracks with missing frames:")
-        for track, gaps in track_gaps.items():
-            print(f"Track {track} has missing frames: {gaps}")
-    else:
-        print("No missing frames detected in any track.")

@@ -22,7 +22,7 @@ COND_PALETTE = {
 COND_ORDER = ["fed", "starved"]
 
 
-df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/nearest_neighbour.csv')
+df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/nearest_neighbour.csv')
 df['role'] = df['track_id'].map({0: 'fed', 1: 'starved'})
 
 
@@ -250,7 +250,7 @@ plt.close()
 
 
 
-df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/head_head_approach_angles.csv')
+df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/head_head_approach_angles.csv')
 df['role'] = df['track_id'].map({0: 'fed', 1: 'starved'})
 
 # df = df[df['body_body_distance'] < 5]
@@ -281,7 +281,7 @@ plt.close()
 
 
 
-df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/head_head_approach_angles.csv')
+df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/head_head_approach_angles.csv')
 df['role'] = df['track_id'].map({0: 'fed', 1: 'starved'})
 
 ## identify tailing events
@@ -310,7 +310,7 @@ plt.close()
 
 
 
-df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/head_head_approach_angles.csv')
+df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/head_head_approach_angles.csv')
 df['role'] = df['track_id'].map({0: 'fed', 1: 'starved'})
 
 ## identify tailing events
@@ -339,7 +339,7 @@ plt.close()
 
 
 
-df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/head_head_approach_angles.csv')
+df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/head_head_approach_angles.csv')
 df['role'] = df['track_id'].map({0: 'fed', 1: 'starved'})
 
 ## identify tailing events
@@ -368,7 +368,7 @@ plt.close()
 
 
 
-df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/head_head_approach_angles.csv')
+df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/head_head_approach_angles.csv')
 df['role'] = df['track_id'].map({0: 'fed', 1: 'starved'})
 
 ## identify tailing events
@@ -428,7 +428,7 @@ plt.show()
 
 
 
-df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/closest_contacts_1mm.csv')
+df = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/closest_contacts_1mm.csv')
 
 df = df[df['Closest Interaction Type'] == 'head_tail']
 

@@ -9,14 +9,23 @@ import matplotlib as mpl
 
 ###### INTERACTION TYPE - ALL NODE-NODE PER FRAME CONTACTS ######
 
-df1 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/fed-fed/closest_contacts_1mm.csv')
-df1['condition'] = 'fed-fed'
+df1 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/group-housed/fed-fed/closest_contacts_1mm.csv')
+df1['condition'] = 'GH-fed-fed'
 
-df2 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed/closest_contacts_1mm.csv')
-df2['condition'] = 'fed-starved'
+df2 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/group-housed/fed-starved/closest_contacts_1mm.csv')
+df2['condition'] = 'GH-fed-starved'
 
-df3 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-starved/closest_contacts_1mm.csv')
-df3['condition'] = 'starved-starved'
+df3 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/group-housed/starved-starved/closest_contacts_1mm.csv')
+df3['condition'] = 'GH-starved-starved'
+
+df4 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-fed/closest_contacts_1mm.csv')
+df4['condition'] = 'SI-fed-fed'
+
+df5 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved/closest_contacts_1mm.csv')
+df5['condition'] = 'SI-fed-starved'
+
+df6 = pd.read_csv('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/starved-starved/closest_contacts_1mm.csv')
+df6['condition'] = 'SI-starved-starved'
 
 # ---- Adobe-friendly fonts (must be set BEFORE plotting) ----
 mpl.rcParams['pdf.fonttype'] = 42
@@ -25,7 +34,7 @@ mpl.rcParams['ps.fonttype'] = 42
 
 plt.figure(figsize=(4,8))
 
-df = pd.concat([df1, df2, df3], ignore_index=True)
+df = pd.concat([df1, df2, df3, df4, df5, df6], ignore_index=True)
 
 print(df3.columns)
 
@@ -77,11 +86,11 @@ plt.tight_layout(rect=[1, 1, 1, 1])
 
 plt.ylim(0, None)
 
-plt.savefig('/Users/cochral/repos/behavioural-analysis/plots/socially-isolated/head-head/total_contact_frames.png', dpi=300, bbox_inches='tight')
-plt.savefig(
-    '/Users/cochral/repos/behavioural-analysis/plots/socially-isolated/head-head/total_contact_frames.pdf',
-    format='pdf',
-    bbox_inches='tight'
-)
+# plt.savefig('/Users/cochral/repos/behavioural-analysis/plots/socially-isolated/head-head/total_contact_frames.png', dpi=300, bbox_inches='tight')
+# plt.savefig(
+#     '/Users/cochral/repos/behavioural-analysis/plots/socially-isolated/head-head/total_contact_frames.pdf',
+#     format='pdf',
+#     bbox_inches='tight'
+# )
 
 plt.show()

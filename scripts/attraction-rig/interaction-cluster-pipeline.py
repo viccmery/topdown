@@ -472,6 +472,7 @@ class ClusterPipeline:
     
 
 
+
     #### METHOD GRID_VIDEOS: GENERATE GRID VIDEOS OF INTERACTION CLUSTERS
     def grid_videos(self):
 
@@ -618,8 +619,10 @@ class ClusterPipeline:
 
 
         print('grid videos generated') 
-    
-    #### METHOD RAW_TRAJECTORIES: GENERATE RAW TRAJECTORIES OF INTERACTIONS
+
+    ##########################################################################################################
+    ## METHOD RAW_TRAJECTORIES: GENERATE RAW TRAJECTORIES OF INTERACTIONS
+    ##########################################################################################################
     def raw_trajectories(self):
 
         df = self.df
@@ -949,6 +952,8 @@ class ClusterPipeline:
         plt.close()
 
 
+
+
         ## PROPORTION OVER TIME BARPLOT
 
         interaction_starts = full_df[full_df['Normalized Frame'] == 0].copy()
@@ -1104,6 +1109,8 @@ class ClusterPipeline:
         path = os.path.join(self.directory, 'figure_editable.pdf')  
         plt.savefig(path, format="pdf", bbox_inches="tight", dpi=300, transparent=True)
         plt.close()
+
+
 
 
 
@@ -1513,6 +1520,7 @@ class ClusterPipeline:
         path = os.path.join(output, 'deviations_hierarchical.pdf')  
         plt.savefig(path, format="pdf", bbox_inches="tight", dpi=300, transparent=False)
         plt.close()
+
 
 
     
@@ -2801,6 +2809,8 @@ class ClusterPipeline:
             plt.close()
 
 
+
+
     
     #### METHOD SUMMARY_ANCHOR_PARTNER: SUMMARY QUANTIFICATIONS ANCHOR/PARTNER
     def summary_anchor_partner(self):
@@ -3806,6 +3816,8 @@ class ClusterPipeline:
         plt.savefig(out_path, dpi=300, bbox_inches='tight')
         plt.close(fig_sum)
     
+
+
     
     #### METHOD MEAN_TRACES: HEAD-BODY-TAIL MEAN TRACES
     def mean_traces(self):
@@ -3888,6 +3900,7 @@ class ClusterPipeline:
         render_figure("head", "overview_head.png")
         render_figure("body", "overview_body.png")
         render_figure("tail", "overview_tail.png")
+
 
 
     def mean_trace_temporal(self):
@@ -5224,6 +5237,8 @@ class ClusterPipeline:
         plt.close()
     
 
+
+
     def hierarchal_mean_trace_summary(self):
         
         df = self.df.copy()
@@ -5554,28 +5569,6 @@ class ClusterPipeline:
         plt.show()
 
         plt.close(fig)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-    
-
-
-
-
-
-
 
 
 

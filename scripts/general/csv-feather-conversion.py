@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-df = pd.read_csv('/Users/cochral/Desktop/SLAEP/todo/2025-03-11_13-27-42_td5.tracks.000_2025-03-11_13-27-42_td5.analysis.csv')
+df = pd.read_csv('/Users/cochral/Desktop/SLAEP/h-h/2026-03-09_12-40-34_td14.tracks.000_2026-03-09_12-40-34_td14.analysis.csv')
 
 print(df['track'].unique())
 
@@ -64,9 +64,11 @@ jumped_tracks = df[df['displacement'] > 30][['frame_idx', 'track', 'displacement
 print(jumped_tracks)
 
 
+# %%
+
 # %% PRINT FRAMES OF CERTAIN TRACK
 
-print(df[df['track'] == 'track_60']['frame_idx'])
+print(df[df['track'] == 'track_15']['frame_idx'])
 
 
 ######################

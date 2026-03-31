@@ -376,6 +376,7 @@ def syllable_features(df, output):
         plt.savefig(os.path.join(output, f'{syllable}_normalised.png'), dpi=300, bbox_inches='tight')
         plt.close() 
 
+
 # --------------------------------------------------------
 # COMPARING_MODELS: model comparison plots
 # --------------------------------------------------------
@@ -716,6 +717,9 @@ def comparing_models(directory):
 
 
 
+
+
+
 def translate_rotate_syllables(df):
 
     df = df.sort_values(['name', 'frame_index']).reset_index(drop=True) # kappa shd be included if multiple models
@@ -948,6 +952,8 @@ def mean_syllable_trajectories_per_kappa(directory):
             plt.savefig(out_png, dpi=300, bbox_inches='tight')
             plt.close()
         # --------------------------------------------------------
+
+
 
 
 # directory = '/Users/cochral/Desktop/MOSEQ'

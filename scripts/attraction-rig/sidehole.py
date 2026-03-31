@@ -58,7 +58,20 @@ def perform_analysis(directory):
     ## PROXIMITY AND INTERACTION DYNAMICS 
 
     # analysis.potential_interactions(threshold=5.0)
-    # analysis.individual_approach_responses()
+    # analysis.individual_approach_responses(threshold=2)
+    # analysis.individual_approach_responses(threshold=3)
+    # analysis.individual_approach_responses(threshold=4)
+    # analysis.individual_approach_responses(threshold=5)
+    # analysis.individual_approach_responses(threshold=6)
+    # analysis.individual_approach_responses(threshold=7)
+    # analysis.individual_approach_responses(threshold=8)
+    # analysis.individual_approach_responses(threshold=9)
+    # analysis.individual_approach_responses(threshold=10)
+
+    # analysis.individual_approach_responses_consistent_approach_angle(threshold=5)
+    # analysis.individual_approach_responses_consistent_approach_angle(threshold=10)
+
+
 
     # analysis.nearest_neighbour()
     # analysis.interactions()
@@ -68,6 +81,11 @@ def perform_analysis(directory):
     # analysis.interaction_bout_dynamics() 
     # analysis.contacts(proximity_threshold=5)
 
+
+    ## GH AND SI SAME PLATE ANALYSIS
+    # analysis.nearest_neighbour() # has track id, speed, acceleration, angles etc
+    # analysis.GH_SI_interaction_types_closest(threshold=1) # has track id, speed, acceleration, angles etc
+    
     ## HEAD-HEAD ANALYSIS
     # analysis.head_head_interaction_type()
     # analysis.head_head_interaction_type_over_time()
@@ -81,14 +99,15 @@ def perform_analysis(directory):
     # analysis.movement_direction()
     # analysis.head_head_approach_angle()
     # analysis.head_head_first_contact_kinematics()
-    analysis.head_head_contacts_kinematics_over_time()
+    # analysis.head_head_contacts_kinematics_over_time()
+    
 
         
 
 
     ####### --- DIGGING IN ABSENCE OF HOLES --- ######
-    # analysis.total_digging(cleaned=True) #HAVE TO MODIFY???
-    # analysis.digging_behaviour()
+    analysis.total_digging(cleaned=True) #HAVE TO MODIFY???
+    analysis.digging_behaviour()
 
 
     ####### --- HOLES --- ######
@@ -138,6 +157,8 @@ if __name__ == "__main__":
     # perform_analysis("/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/n10/group-housed")
     # perform_analysis("/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/n10/socially-isolated")
 
+    # perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/n10/grouped+isolated')
+
 
     # perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/holes/N10-1-HOLE/GROUP-HOUSED')
     # perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/holes/N10-1-HOLE/SOCIAL-ISOLATION')
@@ -149,15 +170,19 @@ if __name__ == "__main__":
     # perform_analysis('/Volumes/lab-windingm/home/users/cochral/AttractionRig/analysis/testing-methods/test-digging-mask/diff-video')
 
 
-    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-starved')
-    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/starved-fed')
-    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/fed-fed')
+    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/group-housed/starved-starved')
+    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/group-housed/fed-starved')
+    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/group-housed/fed-fed')
+    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/starved-starved')
+    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-starved')
+    perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/head-head/2/socially-isolated/fed-fed')
 
 
 
 
 
     
+
 
 
 

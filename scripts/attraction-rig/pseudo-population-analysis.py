@@ -1292,7 +1292,7 @@ class PseudoAnalysis:
 
     
 
-    def individual_approach_responses(self):
+    def individual_approach_responses(self, threshold=10):
 
         parts = ['head', 'body', 'tail']
 
@@ -1370,10 +1370,17 @@ class PseudoAnalysis:
             )
             cosang = np.clip(cosang, -1, 1)
             return float(np.degrees(np.arccos(cosang)))
+        
+        def speed(row_now, row_next):
+            return np.hypot(
+                row_next['x_body'] - row_now['x_body'],
+                row_next['y_body'] - row_now['y_body']
+            )
 
 
-
+    
         all_events = []
+
 
         for file in self.pseudo_files:
             df = self.pseudo_data[file]
@@ -1390,170 +1397,307 @@ class PseudoAnalysis:
                     for tid, row in zip(g['track_id'], g.itertuples(index=False))
                 }
 
-            for frame in frames[:-1]:  # need next frame
-                if frame + 1 not in per_frame:
-                    continue
+            track_ids = sorted(df['track_id'].unique())
 
-                rows_now = per_frame[frame]
-                rows_next = per_frame[frame + 1]
-
-                for focal_id in rows_now:
-                    if focal_id not in rows_next:
+            for focal_id in track_ids:
+                for stim_id in track_ids:
+                    if stim_id == focal_id:
                         continue
 
-                    focal = rows_now[focal_id]
-                    focal_next = rows_next[focal_id]
+                    in_encounter = False
+                    t_start = None
+                    d_start = None
+                    start_node = None
+                    touch = False
 
-                    ## LARVAE WITH SMALLEST NODE DISTANCE FROM HEAD AND THEN ONE NODE OF THAT LARVAE MUST BE < 35 DEGREES TO BE INC
-
-                    # --- Step 1: find the nearest larva (by closest-node distance), regardless of angle ---
-                    nearest = None
-
-                    for stim_id in rows_now:
-                        if stim_id == focal_id:
-                            continue
-                        if stim_id not in rows_next:
+                    for frame in frames:
+                        rows = per_frame.get(frame, {})
+                        if focal_id not in rows or stim_id not in rows:
+                            in_encounter = False
                             continue
 
-                        stim = rows_now[stim_id]
+                        focal = rows[focal_id]
+                        stim  = rows[stim_id]
 
-                        d_now, stim_node = min_node_distance(focal, stim)
-                        if d_now > 20:
+                        d_min, stim_node = min_node_distance(focal, stim)
+                        if stim_node is None:
                             continue
 
-                        if d_now < 1.0:
+                        angle = approach_angle_to_node(focal, stim, stim_node)
+                        if not np.isfinite(angle):
                             continue
 
-                        if (nearest is None) or (d_now < nearest['d_now']):
-                            nearest = {
+                        # START (THIS IS THE ONLY NEW GATE)
+                        if not in_encounter and d_min < threshold and angle < 35:
+                            in_encounter = True
+                            t_start = frame
+                            d_start = d_min
+                            start_node = stim_node
+                            touch = False
+
+                            focal_dist_centre = np.hypot(
+                                focal['x_body'] - 0,
+                                focal['y_body'] - 0
+                            )
+
+                        # DURING
+                        elif in_encounter and d_min < 1.0:
+                            touch = True
+
+                        # END
+                        elif in_encounter and d_min >= threshold:
+                            all_events.append({
+                                'filename': file,
+                                'focal_id': focal_id,
                                 'stim_id': stim_id,
-                                'd_now': d_now,
-                                'stim_node': stim_node
-                            }
-
-                    # if no neighbour in range, skip
-                    if nearest is None:
-                        continue
-
-                    stim_id = nearest['stim_id']
-                    stim = rows_now[stim_id]
-                    stim_next = rows_next[stim_id]
-
-                    d_now = nearest['d_now']
-                    stim_node = nearest['stim_node']
-
-                    # --- Step 2: visibility gate based on ANY node angle ---
-                    angle, angle_node = min_approach_angle(focal, stim)
-                    if angle is None or np.isnan(angle) or angle > 35:
-                        continue  # nearest neighbour is not in front, skip this frame
-
-                    # # --- Step 3: outcome to the SAME larva next frame ---
-                    # d_next, _ = min_node_distance(focal_next, stim_next)
-
-                    # if d_next < d_now:
-                    #     outcome = 'approach'
-                    # elif d_next > d_now:
-                    #     outcome = 'avoid'
-                    # else:
-                    #     outcome = 'neutral'
-
-                    # all_events.append({
-                    #     'filename': track_file,
-                    #     'frame': frame,
-                    #     'focal_id': focal_id,
-                    #     'stim_id': stim_id,
-                    #     'distance': d_now,
-                    #     'closest_node': stim_node,
-                    #     'approach_angle': angle,
-                    #     'angle_node': angle_node,
-                    #     'distance_moved': d_next - d_now,
-                    #     'outcome': outcome
-                    # })
-
-                    # --- Step 3: outcome over next 3 frames (mean distance) and approach angle ---
-                    future_ds = []
-                    future_as = []
-                    for k in (1, 2, 3, 4): # next x frames
-                        fr_k = frame + k
-                        if fr_k not in per_frame:
-                            future_ds = None
-                            break
-                        if focal_id not in per_frame[fr_k] or stim_id not in per_frame[fr_k]:
-                            future_ds = None
-                            break
-
-                        focal_k = per_frame[fr_k][focal_id]
-                        stim_k = per_frame[fr_k][stim_id]
-
-                        d_k, d_node = min_node_distance(focal_k, stim_k)
-                        if not np.isfinite(d_k):
-                            future_ds = None
-                            break
-
-                        future_ds.append(d_k)
-
-                        # a_k, _ = min_approach_angle(focal_k, stim_k)
-                        # if a_k is None or not np.isfinite(a_k):
-                        #     future_ds = None
-                        #     break
-                        # future_as.append(a_k)
-
-                        a_k = approach_angle_to_node(focal_k, stim_k, d_node)
-                        if np.isnan(a_k):
-                            future_ds = None
-                            break
-                        future_as.append(a_k)
-
-
-
-                    if future_ds is None:
-                        continue
-
-                    d_future = float(np.mean(future_ds))
-                    d_future_min = float(np.min(future_ds))
-                    a_future = float(np.mean(future_as))
-
-                    # if (d_future < 1.0) or (d_future_min < 1.0):
-                    #     outcome = 'contact'
-                    # elif (d_future < d_now) and (a_future <= 35):
-                    #     outcome = 'approach'
-                    # elif (d_future > d_now) and (a_future >= 90):
-                    #     outcome = 'avoid'
-                    # else:
-                    #     outcome = 'neutral'
-
-                    if (d_future < 1.0) or (d_future_min < 1.0):
-                        outcome = 'approach'
-                    elif (d_future < d_now) and (a_future <= angle):
-                        outcome = 'approach'
-                    elif (d_future > d_now) and (a_future >= angle): #90
-                        outcome = 'avoid'
-                    else:
-                        outcome = 'other'
-
-
-                    all_events.append({
-                        'filename': file,
-                        'frame': frame,
-                        'focal_id': focal_id,
-                        'stim_id': stim_id,
-                        'distance': d_now,
-                        'closest_node': stim_node,
-                        'approach_angle': angle,
-                        'angle_node': angle_node,
-                        'distance_future_mean': d_future,
-                        'approach_angle_future_mean': a_future,
-                        'distance_moved': d_future - d_now,
-                        'angle_change': a_future - angle,
-                        'outcome': outcome
-                    })
-
-
+                                'start_frame': t_start,
+                                'start_min_dist': float(d_start),
+                                'first_node': start_node,
+                                'touch': touch,
+                                'dist_from_centre': float(focal_dist_centre)
+                            })
+                            in_encounter = False
 
         df_out = pd.DataFrame(all_events)
         df_out.to_csv(
-            os.path.join(self.directory, 'individual_approach_responses.csv'),
+            os.path.join(self.directory, f'individual_approach_responses_{threshold}.csv'),
             index=False)
+        
+    
+
+
+    def individual_approach_responses_consistent_approach_angle(self, threshold=10): 
+
+        parts = ['head', 'body', 'tail']
+
+        def min_node_distance(row_a, row_b):
+            best_d = np.inf
+            best_pair = None
+
+            for p in parts:
+                x2 = row_b.get(f"x_{p}", np.nan)
+                y2 = row_b.get(f"y_{p}", np.nan)
+                if pd.isna(x2) or pd.isna(y2):
+                    continue
+
+                d = np.hypot(row_a['x_head'] - x2, row_a['y_head'] - y2)
+                if d < best_d:
+                    best_d = d
+                    best_pair = p
+
+            return best_d, best_pair
+
+        
+        def approach_angle_to_node(row_a, row_b, node):
+            # heading vector: body -> head (focal larva)
+            hx, hy = row_a['x_head'], row_a['y_head']
+            bx, by = row_a['x_body'], row_a['y_body']
+            v_heading = np.array([hx - bx, hy - by])
+
+            if np.linalg.norm(v_heading) == 0:
+                return np.nan
+
+            tx = row_b.get(f"x_{node}", np.nan)
+            ty = row_b.get(f"y_{node}", np.nan)
+            if pd.isna(tx) or pd.isna(ty):
+                return np.nan
+
+            v_target = np.array([tx - hx, ty - hy])
+            if np.linalg.norm(v_target) == 0:
+                return np.nan
+
+            cosang = np.dot(v_heading, v_target) / (
+                np.linalg.norm(v_heading) * np.linalg.norm(v_target)
+            )
+            cosang = np.clip(cosang, -1, 1)
+            return float(np.degrees(np.arccos(cosang)))
+        
+        def speed(row_now, row_next):
+            return np.hypot(
+                row_next['x_body'] - row_now['x_body'],
+                row_next['y_body'] - row_now['y_body']
+            )   
+        
+
+        all_frames = []
+        event_id = 0
+
+        for file in self.pseudo_files:
+            df = self.pseudo_data[file]
+            df = df.sort_values(by='frame', ascending=True)
+            df['filename'] = file
+
+            frame_groups = dict(tuple(df.groupby('frame')))
+            frames = sorted(frame_groups.keys())
+
+            per_frame = {}
+            for fr, g in frame_groups.items():
+                per_frame[fr] = {
+                    tid: row._asdict()
+                    for tid, row in zip(g['track_id'], g.itertuples(index=False))
+                }
+
+            track_ids = sorted(df['track_id'].unique())
+
+            for focal_id in track_ids:
+                for stim_id in track_ids:
+
+                    if stim_id == focal_id:
+                        continue
+
+                    in_encounter = False
+                    encounter_rows = []
+                    t_start = None
+
+                    for i, frame in enumerate(frames):
+
+                        rows = per_frame.get(frame, {})
+
+                        if focal_id not in rows or stim_id not in rows:
+                            # end encounter safely
+                            if in_encounter:
+                                all_frames.extend(encounter_rows)
+                                event_id += 1
+                                in_encounter = False
+                            continue
+
+                        focal = rows[focal_id]
+                        stim  = rows[stim_id]
+
+                        # d_min, stim_node = min_node_distance(focal, stim)
+
+                        # if stim_node is None:
+                        #     continue
+
+                        # angle = approach_angle_to_node(focal, stim, stim_node)
+                        # if not np.isfinite(angle):
+                        #     continue
+
+                        # focal head -> closest stim node
+                        d_focal_to_stim, stim_node = min_node_distance(focal, stim)
+                        if stim_node is None:
+                            continue
+
+                        angle_focal = approach_angle_to_node(focal, stim, stim_node)
+                        if not np.isfinite(angle_focal):
+                            continue
+
+                        # stim head -> closest focal node  (same logic, swapped)
+                        d_stim_to_focal, focal_node = min_node_distance(stim, focal)
+                        if focal_node is None:
+                            continue
+
+                        angle_stim = approach_angle_to_node(stim, focal, focal_node)
+                        if not np.isfinite(angle_stim):
+                            continue
+
+                        # pick one distance to use consistently (I’d keep focal→stim distance)
+                        d_min = d_focal_to_stim
+
+
+                        # ---- START CONDITION (same as your original) ----
+                        if not in_encounter and d_min < threshold and angle_focal < 35:
+                            in_encounter = True
+                            t_start = frame
+                            encounter_rows = []
+
+                        # ---- DURING ENCOUNTER ----
+                        if in_encounter and d_min < threshold:
+
+                            focal_speed = np.nan
+                            stim_speed = np.nan
+
+                            if i < len(frames) - 1:
+                                next_frame = frames[i + 1]
+                                rows_next = per_frame.get(next_frame, {})
+
+                                if focal_id in rows_next:
+                                    focal_speed = speed(focal, rows_next[focal_id])
+
+                                if stim_id in rows_next:
+                                    stim_speed = speed(stim, rows_next[stim_id])
+
+                            encounter_rows.append({
+                                'event_id': event_id,
+                                'filename': file,
+                                'frame': frame,
+                                'rel_time': frame - t_start,
+                                'focal_id': focal_id,
+                                'stim_id': stim_id,
+                                'focal_angle': angle_focal,
+                                'stim_angle': angle_stim,
+                                'distance': d_min,
+                                'focal_speed': focal_speed,
+                                'stim_speed': stim_speed
+                            })
+
+                        # ---- END CONDITION ----
+                        elif in_encounter and d_min >= threshold:
+                            all_frames.extend(encounter_rows)
+                            event_id += 1
+                            in_encounter = False
+
+        df = pd.DataFrame(all_frames)
+        df = df.sort_values(['event_id', 'frame'])
+
+        touch_frames = (
+                df[df['distance'] < 1.5]
+                .groupby('event_id')['frame']
+                .min()
+            )
+        
+        min_dist_frames = (
+                df.loc[df.groupby('event_id')['distance'].idxmin()]
+                .set_index('event_id')['frame']
+            )
+
+        decision_frame = min_dist_frames.copy()
+        # overwrite with touch frame where it exists
+        decision_frame.update(touch_frames)
+
+        df['decision_frame'] = df['event_id'].map(decision_frame)
+        df_approach = df[df['frame'] <= df['decision_frame']].copy()
+
+        bins = np.arange(0, 181, 30)
+        df_approach['angle_bin'] = pd.cut(
+            df_approach['stim_angle'],
+            bins=bins,
+            right=False
+        )
+
+        consistent_events = (
+            df_approach
+            .groupby('event_id')['angle_bin']
+            .nunique() == 1
+        )
+        keep_ids = consistent_events[consistent_events].index
+        df_consistent = df_approach[df_approach['event_id'].isin(keep_ids)].copy()
+
+        df_consistent = df_consistent[
+            df_consistent.groupby('event_id')['event_id'].transform('size') > 2
+        ].copy()
+
+
+        df_consistent.to_csv(
+            os.path.join(self.directory, f'individual_approach_responses_consistent_angle_{threshold}.csv'),
+            index=False
+        )   
+
+
+
+
+
+
+
+
+
+
+
+        
+
+            
+
+
 
 
 
@@ -1583,18 +1727,31 @@ def perform_analysis(directory):
     # analysis.trajectory()
     # analysis.contacts(proximity_threshold=5)
     # analysis.nearest_neighbour()
-    analysis.interaction_types()
-    analysis.interaction_types_closest()
+    # analysis.interaction_types()
+    # analysis.interaction_types_closest()
     # analysis.individual_approach_responses()
 
     # analysis.total_digging(cleaned=True)
     # analysis.digging_behaviour()
 
+    # analysis.individual_approach_responses(2)
+    # analysis.individual_approach_responses(3)
+    # analysis.individual_approach_responses(4)
+    # analysis.individual_approach_responses(5)
+    # analysis.individual_approach_responses(6)
+    # analysis.individual_approach_responses(7)
+    # analysis.individual_approach_responses(8)
+    # analysis.individual_approach_responses(9)
+    # analysis.individual_approach_responses(10)
+
+    analysis.individual_approach_responses_consistent_approach_angle(10)
+
+
     print(f"Analysis complete for {directory}")
 
 
 
-# perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/pseudo-n10/group-housed')
+perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/pseudo-n10/group-housed')
 perform_analysis('/Volumes/lab-windingm/home/users/cochral/LRS/AttractionRig/analysis/social-isolation/pseudo-n10/socially-isolated')
 # perform_analysis('/Volumes/lab-windingm/home/users/cochral/AttractionRig/analysis/social-isolation/pseudo-n2/group-housed')
 # perform_analysis('/Volumes/lab-windingm/home/users/cochral/AttractionRig/analysis/social-isolation/pseudo-n2/socially-isolated')
