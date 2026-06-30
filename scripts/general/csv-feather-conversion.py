@@ -10,9 +10,27 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
+import re
+
+USER = "meryv"
+
+home_folder = Path("/Users") / USER
+desktop_folder = home_folder / "Desktop"
+sleap_folder = desktop_folder / "sleap"
+csv_folder = sleap_folder / "clean-csv"
+feather_folder = sleap_folder / "csv-tofeather"
+feather_folder.mkdir(parents=True, exist_ok=True)
+
+#change everytime
+csv_file = csv_folder / "2026-06-26_td4_anosmic.tracks.2026-06-26_td4_anosmic.analysis.csv"
+feather_file = feather_folder / "2026-06-26_td4_anosmic.tracks.feather"
 
 
-df = pd.read_csv('/Users/cochral/Desktop/SLAEP/h-h/2026-03-09_12-40-34_td14.tracks.000_2026-03-09_12-40-34_td14.analysis.csv')
+print(f"Reading CSVs from: {csv_folder}")
+print(f"Saving feathers to: {feather_folder}")
+
+df = pd.read_csv(csv_file)
 
 print(df['track'].unique())
 
@@ -38,8 +56,6 @@ else:
 
 ############################
 # %% MISSING FRAMES IN GENERAL
-
-
 
 frames = df['frame_idx'].unique()  # Get unique frames in your DataFrame
 all_frames = set(range(0, 3601))  # Set of all expected frame numbers (from 0 to 3600)
@@ -94,7 +110,6 @@ df.rename(columns={'frame_idx': 'frame', 'track': 'track_id', 'head.x': 'x_head'
 
 df['track_id'] = df['track_id'].str.replace('track_', '', regex=True).astype(int)
 
-
 df = df.drop(columns=['displacement'])
 
 
@@ -104,16 +119,14 @@ print(df.head())
 
 
 # %% CSV -> FEATHER AND SLP
-
-df.to_feather('/Users/cochral/Desktop/SLAEP/feather.feather')
-
-
-
-
-
-
-
+df.to_feather(feather_file)
+print(f"Saved: {feather_file.name}")
 
 #############################################################
 
 # %%
+
+# ---------------------------------------------------------------------
+# LOOP THROUGH ALL CSV FILES
+# ---------------------------------------------------------------------
+
